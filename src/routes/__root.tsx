@@ -90,7 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Misk.229 — Parfumerie orientale à Cotonou" },
       {
         property: "og:description",
-        content: "Oud, musc, ambre et senteurs orientales authentiques. Découvrez notre collection à Cotonou.",
+        content: "Misk.229, parfumerie de niche à Cotonou : oud, musc, ambre et senteurs orientales authentiques. Boulevard de St Michel, Cotonou, Bénin.",
       },
       { property: "og:image", content: "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?fm=jpg&q=80&w=1200&auto=format&fit=crop" },
       { property: "og:locale", content: "fr_FR" },
@@ -99,7 +99,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@themisk.229" },
       { name: "twitter:title", content: "Misk.229 — Parfumerie orientale à Cotonou" },
-      { name: "twitter:description", content: "Oud, musc, ambre et senteurs orientales authentiques." },
+      { name: "twitter:description", content: "Misk.229, parfumerie de niche à Cotonou : oud, musc, ambre et senteurs orientales authentiques. Boulevard de St Michel, Cotonou, Bénin." },
       { name: "twitter:image", content: "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?fm=jpg&q=80&w=1200&auto=format&fit=crop" },
     ],
     links: [
