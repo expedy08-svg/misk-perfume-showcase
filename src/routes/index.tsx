@@ -466,7 +466,7 @@ function ProductCard({
         className="misk-card-glow group relative rounded-lg border border-noyer-clair/40 bg-gradient-to-b from-noyer/40 to-noir-profond p-6 flex flex-col items-center text-center"
       >
         {/* Silhouette flacon — placeholder en attendant les photos gros plan */}
-        <div className="relative w-full aspect-[3/4] mb-6 flex items-center justify-center overflow-hidden rounded-md bg-noir-profond/60">
+        <div className="relative w-full h-64 sm:h-72 mb-6 flex items-center justify-center overflow-hidden rounded-md bg-noir-profond/60">
           <BottleSilhouette />
           <div className="absolute inset-0 bg-gradient-to-t from-noir-profond/80 via-transparent to-transparent" />
         </div>
@@ -497,7 +497,10 @@ function BottleSilhouette() {
   return (
     <svg
       viewBox="0 0 100 140"
-      className="w-1/2 h-1/2 opacity-70 group-hover:opacity-90 transition-opacity duration-500"
+      width={110}
+      height={154}
+      style={{ maxWidth: '45%', maxHeight: '80%' }}
+      className="opacity-70 group-hover:opacity-90 transition-opacity duration-500"
       fill="none"
     >
       <rect x="40" y="8" width="20" height="14" rx="2" fill="#c9a227" opacity="0.8" />
