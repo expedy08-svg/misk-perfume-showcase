@@ -77,21 +77,44 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Misk — Parfumerie de luxe à Cotonou" },
-      { name: "description", content: "Misk, parfumerie de luxe à Cotonou au Bénin. Découvrez nos parfums d'exception et fragrances uniques." },
-      { name: "author", content: "Misk" },
-      { property: "og:title", content: "Misk — Parfumerie de luxe à Cotonou" },
-      { property: "og:description", content: "Misk, parfumerie de luxe à Cotonou au Bénin. Découvrez nos parfums d'exception et fragrances uniques." },
+      { title: "Misk.229 — Parfumerie orientale à Cotonou" },
+      {
+        name: "description",
+        content:
+          "Misk.229, parfumerie de niche à Cotonou : oud, musc, ambre et senteurs orientales authentiques. Boulevard de St Michel, Cotonou, Bénin.",
+      },
+      { name: "author", content: "Misk.229" },
+
+      // Open Graph — aperçu du lien sur WhatsApp / Instagram / Facebook
       { property: "og:type", content: "website" },
+      { property: "og:title", content: "Misk.229 — Parfumerie orientale à Cotonou" },
+      {
+        property: "og:description",
+        content: "Oud, musc, ambre et senteurs orientales authentiques. Découvrez notre collection à Cotonou.",
+      },
+      { property: "og:image", content: "/boutique-1.jpg" },
+      { property: "og:locale", content: "fr_FR" },
+
+      // Twitter Card (repris par certains aperçus de liens)
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@themisk.229" },
+      { name: "twitter:title", content: "Misk.229 — Parfumerie orientale à Cotonou" },
+      { name: "twitter:description", content: "Oud, musc, ambre et senteurs orientales authentiques." },
+      { name: "twitter:image", content: "/boutique-1.jpg" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+
+      // Préconnexion Google Fonts : évite le flash de police par défaut
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
+
+      // Preload de la 1ère photo hero : elle s'affiche dès le chargement
+      { rel: "preload", as: "image", href: "/boutique-1.jpg" },
     ],
   }),
   shellComponent: RootShell,
@@ -102,7 +125,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <head>
         <HeadContent />
       </head>
