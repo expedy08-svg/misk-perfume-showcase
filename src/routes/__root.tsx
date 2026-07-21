@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -92,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         property: "og:description",
         content: "Oud, musc, ambre et senteurs orientales authentiques. Découvrez notre collection à Cotonou.",
       },
-      { property: "og:image", content: "/boutique-1.jpg" },
+      { property: "og:image", content: "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?fm=jpg&q=80&w=1200&auto=format&fit=crop" },
       { property: "og:locale", content: "fr_FR" },
 
       // Twitter Card (repris par certains aperçus de liens)
@@ -100,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@themisk.229" },
       { name: "twitter:title", content: "Misk.229 — Parfumerie orientale à Cotonou" },
       { name: "twitter:description", content: "Oud, musc, ambre et senteurs orientales authentiques." },
-      { name: "twitter:image", content: "/boutique-1.jpg" },
+      { name: "twitter:image", content: "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?fm=jpg&q=80&w=1200&auto=format&fit=crop" },
     ],
     links: [
       {
@@ -114,7 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
 
       // Preload de la 1ère photo hero : elle s'affiche dès le chargement
-      { rel: "preload", as: "image", href: "/boutique-1.jpg" },
+      { rel: "preload", as: "image", href: "https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?fm=jpg&q=80&w=1200&auto=format&fit=crop" },
     ],
   }),
   shellComponent: RootShell,
