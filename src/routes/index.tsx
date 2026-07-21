@@ -34,9 +34,15 @@ const ADDRESS = 'Boulevard de St Michel, Cotonou, Bénin'
 const GOOGLE_RATING = 5.0
 const GOOGLE_REVIEWS_COUNT = 3
 
-// Photos boutique actuelles (à remplacer / compléter au fur et à mesure)
-// -> uploader dans /public puis référencer en /nom-fichier.jpg
-const HERO_PHOTOS = ['/boutique-1.jpg', '/boutique-2.jpg', '/boutique-3.jpg']
+// Photos d'ambiance temporaires (Unsplash, libres de droits) — À REMPLACER
+// dès que les vraies photos de la boutique Misk.229 sont disponibles.
+// Il suffira de changer ces 3 URLs (ou de les remplacer par /boutique-1.jpg etc.
+// après upload dans public/).
+const HERO_PHOTOS = [
+  'https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?fm=jpg&q=80&w=1600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1591892212776-a09de24dbe84?fm=jpg&q=80&w=1600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1749264361617-dbe17a223f54?fm=jpg&q=80&w=1600&auto=format&fit=crop',
+]
 
 // Produits — NOMS / PRIX À CONFIRMER PAR MISK.229, placeholders pour l'instant
 const PRODUCTS = [
