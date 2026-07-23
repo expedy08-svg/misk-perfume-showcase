@@ -1,747 +1,612 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
+ import { createFileRoute } from "@tanstack/react-router";
+import { useRef, useState, type ReactNode } from "react";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import {
-  motion,
-  useMotionValue,
-  useScroll,
-  useTransform,
-  useSpring,
-  AnimatePresence,
-} from 'framer-motion'
-import {
-  Menu,
-  X,
-  MessageCircle,
-  Instagram,
-  MapPin,
-  Star,
-  Phone,
-  Sparkles,
-} from 'lucide-react'
+  Scissors, Sparkles, Hand, Eye, Brush, Flower2, Droplets, Wand2,
+  Phone, MapPin, Clock, Star, Instagram, Facebook, ChevronDown, Check,
+} from "lucide-react";
 
-export const Route = createFileRoute('/')({
-  component: Home,
-})
+import heroWoman from "@/assets/hero-woman.jpg";
+import salonInterior from "@/assets/salon-interior.jpg";
+import galleryNails from "@/assets/gallery-nails.jpg";
+import galleryBride from "@/assets/gallery-bride.jpg";
+import galleryLashes from "@/assets/gallery-lashes.jpg";
+import gallerySpa from "@/assets/gallery-spa.jpg";
+import bgDecor from "@/assets/bg-decor.jpg";
 
-// ============================================================
-// CONTACT — MISK.229
-// ============================================================
-const WHATSAPP_NUMBER = '2290151259542'
-const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}`
-const INSTAGRAM_HANDLE = '@themisk.229'
-const INSTAGRAM_LINK = 'https://instagram.com/themisk.229'
-const ADDRESS = 'Boulevard de St Michel, Cotonou, Bénin'
-const GOOGLE_RATING = 5.0
-const GOOGLE_REVIEWS_COUNT = 3
+export const Route = createFileRoute("/")({ component: Index });
 
-// Photos d'ambiance temporaires (Unsplash, libres de droits) — À REMPLACER
-// dès que les vraies photos de la boutique Misk.229 sont disponibles.
-// Il suffira de changer ces 3 URLs (ou de les remplacer par /boutique-1.jpg etc.
-// après upload dans public/).
-const HERO_PHOTOS = [
-  'https://images.unsplash.com/photo-1709662369957-0cbf9f8452fc?fm=jpg&q=80&w=1600&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1591892212776-a09de24dbe84?fm=jpg&q=80&w=1600&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1749264361617-dbe17a223f54?fm=jpg&q=80&w=1600&auto=format&fit=crop',
-]
+/* ---------- Reusable primitives ---------- */
 
-// Produits — NOMS / PRIX À CONFIRMER PAR MISK.229, placeholders pour l'instant
-const PRODUCTS = [
-  {
-    id: 1,
-    name: 'Oud Impérial',
-    family: 'Oriental boisé',
-    price: '25 000 FCFA',
-    note: 'Oud, safran, bois de santal',
-  },
-  {
-    id: 2,
-    name: 'Musc Noir',
-    family: 'Musqué envoûtant',
-    price: '20 000 FCFA',
-    note: 'Musc blanc, ambre, vanille',
-  },
-  {
-    id: 3,
-    name: "Rose d'Orient",
-    family: 'Floral oriental',
-    price: '22 000 FCFA',
-    note: 'Rose de Damas, oud, épices',
-  },
-  {
-    id: 4,
-    name: 'Ambre Doré',
-    family: 'Ambré chaud',
-    price: '23 000 FCFA',
-    note: 'Ambre gris, cuir, fève tonka',
-  },
-]
-
-const REVIEWS = [
-  {
-    name: 'Client Google',
-    text: 'Accueil chaleureux et parfums qui tiennent toute la journée. Le Oud Impérial est devenu mon signature.',
-  },
-  {
-    name: 'Client Google',
-    text: "Boutique élégante, conseils personnalisés selon la peau. On sent vraiment l'expertise.",
-  },
-  {
-    name: 'Client Google',
-    text: 'Rapport qualité-prix excellent pour des senteurs qui rivalisent avec les grandes maisons.',
-  },
-]
-
-// ============================================================
-// UTIL — détecte un pointeur "souris" (désactive le tilt sur tactile)
-// ============================================================
-function usePointerFine() {
-  const [fine, setFine] = useState(true)
-
-  useEffect(() => {
-    const mq = window.matchMedia('(hover: hover) and (pointer: fine)')
-    setFine(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setFine(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
-
-  return fine
-}
-
-// ============================================================
-// HOME
-// ============================================================
-function Home() {
+function CurveDivider({ flip = false, color = "#FDF8F5" }: { flip?: boolean; color?: string }) {
   return (
-    <div className="min-h-screen bg-noir text-creme font-body">
-      <SmokeVeilIntro />
-      <Header />
-      <Hero />
-      <Products />
-      <About />
-      <ReviewsSection />
-      <Footer />
-      <WhatsAppFloatingButton />
+    <div className="relative w-full leading-none" style={{ transform: flip ? "rotate(180deg)" : undefined }}>
+      <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="block w-full h-[60px] md:h-[100px]">
+        <path d="M0,64 C240,120 480,0 720,40 C960,80 1200,120 1440,56 L1440,120 L0,120 Z" fill={color} />
+      </svg>
     </div>
-  )
+  );
 }
 
-// ============================================================
-// TRANSITION D'ENTRÉE — voile sombre qui se dissipe (fumée de parfum)
-// ============================================================
-function SmokeVeilIntro() {
-  const [visible, setVisible] = useState(true)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), 1900)
-    return () => clearTimeout(timer)
-  }, [])
-
-  return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center bg-noir-profond"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.9, ease: 'easeInOut' } }}
-        >
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              background:
-                'radial-gradient(circle at 50% 50%, rgba(201,162,39,0.12) 0%, rgba(13,9,6,1) 70%)',
-            }}
-            initial={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-            animate={{ opacity: 0, scale: 1.6, filter: 'blur(20px)' }}
-            transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
-          />
-          <motion.p
-            className="relative font-heading text-2xl md:text-3xl tracking-[0.3em] text-or-clair"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 1, 1, 0] }}
-            transition={{ duration: 1.8, times: [0, 0.3, 0.7, 1] }}
-          >
-            MISK.229
-          </motion.p>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  )
-}
-
-// ============================================================
-// HEADER
-// ============================================================
-function Header() {
-  const [scrolled, setScrolled] = useState(false)
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  const links = [
-    { label: 'Accueil', href: '#accueil' },
-    { label: 'Parfums', href: '#parfums' },
-    { label: 'À propos', href: '#a-propos' },
-    { label: 'Avis', href: '#avis' },
-    { label: 'Contact', href: '#contact' },
-  ]
-
-  return (
-    <motion.header
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: 1.9 }}
-      className={`fixed top-0 inset-x-0 z-50 transition-colors duration-500 ${
-        scrolled ? 'bg-noir/90 backdrop-blur-md border-b border-noyer-clair/30' : 'bg-transparent'
-      }`}
-    >
-      <div className="max-w-6xl mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
-        <a href="#accueil" className="font-heading text-2xl tracking-[0.25em] text-creme">
-          MISK<span className="text-or">.229</span>
-        </a>
-
-        <nav className="hidden md:flex items-center gap-10">
-          {links.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm tracking-wide text-creme-douce hover:text-or transition-colors duration-300"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-
-        <div className="hidden md:block">
-          <a
-            href={WHATSAPP_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-or/40 px-5 py-2 text-sm text-or hover:bg-or hover:text-noir transition-colors duration-300"
-          >
-            <MessageCircle className="w-4 h-4" />
-            WhatsApp
-          </a>
-        </div>
-
-        <button
-          className="md:hidden text-creme"
-          onClick={() => setOpen(!open)}
-          aria-label="Menu"
-        >
-          {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      </div>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35 }}
-            className="md:hidden overflow-hidden bg-noir border-b border-noyer-clair/30"
-          >
-            <div className="flex flex-col px-6 py-6 gap-5">
-              {links.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="text-creme-douce hover:text-or transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
-              <a
-                href={WHATSAPP_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-or"
-              >
-                <MessageCircle className="w-4 h-4" />
-                Écrire sur WhatsApp
-              </a>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.header>
-  )
-}
-
-// ============================================================
-// HERO — titre lettre par lettre + halo doré pulsant
-// ============================================================
-function AnimatedTitle({ text }: { text: string }) {
-  return (
-    <h1 className="font-heading text-5xl md:text-7xl lg:text-8xl text-creme leading-none">
-      {text.split('').map((char, i) => (
-        <motion.span
-          key={i}
-          className="inline-block"
-          initial={{ opacity: 0, y: 30, filter: 'blur(6px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{
-            duration: 0.7,
-            delay: 2.1 + i * 0.07,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        >
-          {char === ' ' ? '\u00A0' : char}
-        </motion.span>
-      ))}
-    </h1>
-  )
-}
-
-// Fond hero : fondu lent entre les 3 photos boutique (ambiance qui vit
-// même sans avoir encore les photos produits en gros plan)
-function HeroBackgroundSlideshow() {
-  const [index, setIndex] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % HERO_PHOTOS.length)
-    }, 6000)
-    return () => clearInterval(interval)
-  }, [])
-
-  return (
-    <div className="absolute inset-0">
-      <AnimatePresence mode="sync">
-        <motion.div
-          key={HERO_PHOTOS[index]}
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${HERO_PHOTOS[index]})` }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.8, ease: 'easeInOut' }}
-        />
-      </AnimatePresence>
-    </div>
-  )
-}
-
-function Hero() {
-  return (
-    <section
-      id="accueil"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden misk-grain"
-    >
-      {/* Fond photo boutique en fondu + voile sombre */}
-      <HeroBackgroundSlideshow />
-      <div className="absolute inset-0 bg-gradient-to-b from-noir-profond/90 via-noir/85 to-noir" />
-
-      {/* Halo doré pulsant derrière le titre */}
-      <div
-        className="animate-misk-halo absolute w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(circle, rgba(201,162,39,0.35) 0%, rgba(201,162,39,0) 70%)',
-          filter: 'blur(10px)',
-        }}
-      />
-
-      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.9 }}
-          className="uppercase tracking-[0.4em] text-xs md:text-sm text-or mb-6"
-        >
-          Parfumerie orientale — Cotonou
-        </motion.p>
-
-        <AnimatedTitle text="MISK.229" />
-
-        <motion.p
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 3.2 }}
-          className="mt-6 text-creme-douce text-lg md:text-xl font-light tracking-wide"
-        >
-          L'essence de l'orient, révélée dans la pénombre.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 3.5 }}
-          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
-        >
-          <a
-            href="#parfums"
-            className="inline-flex items-center gap-2 rounded-full bg-or px-8 py-3 text-noir font-medium tracking-wide hover:bg-or-clair transition-colors duration-300"
-          >
-            <Sparkles className="w-4 h-4" />
-            Découvrir nos parfums
-          </a>
-          <a
-            href={WHATSAPP_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-creme/30 px-8 py-3 text-creme tracking-wide hover:border-or hover:text-or transition-colors duration-300"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Nous écrire
-          </a>
-        </motion.div>
-      </div>
-
-      {/* Indicateur de scroll, sobre */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 4 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-px h-10 bg-gradient-to-b from-or to-transparent"
-        />
-      </motion.div>
-    </section>
-  )
-}
-
-// ============================================================
-// PRODUITS — flottaison + tilt 3D + ombre dorée + parallax
-// ============================================================
-function ProductCard({
-  product,
-  index,
-}: {
-  product: (typeof PRODUCTS)[number]
-  index: number
-}) {
-  const ref = useRef<HTMLDivElement>(null)
-  const canTilt = usePointerFine()
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
-
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), {
-    stiffness: 150,
-    damping: 18,
-  })
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), {
-    stiffness: 150,
-    damping: 18,
-  })
-
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    if (!canTilt) return
-    const el = ref.current
-    if (!el) return
-    const rect = el.getBoundingClientRect()
-    mouseX.set((e.clientX - rect.left) / rect.width - 0.5)
-    mouseY.set((e.clientY - rect.top) / rect.height - 0.5)
-  }
-
-  function handleMouseLeave() {
-    mouseX.set(0)
-    mouseY.set(0)
-  }
-
+function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{ duration: 0.8, delay: index * 0.12 }}
-      className="animate-misk-float"
-      style={{ animationDelay: `${index * 0.4}s` }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+      className={className}
     >
-      <motion.div
-        ref={ref}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        style={canTilt ? { rotateX, rotateY, transformPerspective: 800 } : undefined}
-        className="misk-card-glow group relative rounded-lg border border-noyer-clair/40 bg-gradient-to-b from-noyer/40 to-noir-profond p-6 flex flex-col items-center text-center"
-      >
-        {/* Silhouette flacon — placeholder en attendant les photos gros plan */}
-        <div className="relative w-full h-64 sm:h-72 mb-6 flex items-center justify-center overflow-hidden rounded-md bg-noir-profond/60">
-          <BottleSilhouette />
-          <div className="absolute inset-0 bg-gradient-to-t from-noir-profond/80 via-transparent to-transparent" />
-        </div>
-
-        <p className="text-xs uppercase tracking-[0.25em] text-or mb-2">
-          {product.family}
-        </p>
-        <h3 className="font-heading text-2xl text-creme mb-2">{product.name}</h3>
-        <p className="text-sm text-creme-douce/70 mb-4">{product.note}</p>
-        <p className="text-or-clair font-medium mb-5">{product.price}</p>
-
-        <a
-          href={`${WHATSAPP_LINK}?text=${encodeURIComponent(
-            `Bonjour, je suis intéressé(e) par ${product.name}.`,
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm text-creme border-b border-or/50 pb-0.5 hover:text-or transition-colors duration-300"
-        >
-          Se renseigner
-        </a>
-      </motion.div>
+      {children}
     </motion.div>
-  )
+  );
 }
 
-function BottleSilhouette() {
+function useLayered(ref: React.RefObject<HTMLElement | null>, reduced: boolean) {
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const bgY = useTransform(scrollYProgress, [0, 1], reduced ? ["0%", "0%"] : ["-12%", "12%"]);
+  const fgY = useTransform(scrollYProgress, [0, 1], reduced ? ["0%", "0%"] : ["6%", "-6%"]);
+  const zoom = useTransform(scrollYProgress, [0, 1], reduced ? [1, 1] : [1, 1.15]);
+  const softOp = useTransform(scrollYProgress, [0, 0.5, 1], [0.85, 1, 0.85]);
+  return { scrollYProgress, bgY, fgY, zoom, softOp };
+}
+
+function ZoomImage({ src, alt, className = "", height = "h-[380px] md:h-[520px]" }: { src: string; alt: string; className?: string; height?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const scale = useTransform(scrollYProgress, [0, 1], reduced ? [1, 1] : [1.08, 1.32]);
+  const y = useTransform(scrollYProgress, [0, 1], reduced ? ["0%", "0%"] : ["-7%", "7%"]);
   return (
-    <svg
-      viewBox="0 0 100 140"
-      width={110}
-      height={154}
-      style={{ maxWidth: '45%', maxHeight: '80%' }}
-      className="opacity-70 group-hover:opacity-90 transition-opacity duration-500"
-      fill="none"
-    >
-      <rect x="40" y="8" width="20" height="14" rx="2" fill="#c9a227" opacity="0.8" />
-      <rect x="44" y="2" width="12" height="8" rx="1.5" fill="#c9a227" />
-      <path
-        d="M35 22 L65 22 L72 40 L72 128 Q72 134 66 134 L34 134 Q28 134 28 128 L28 40 Z"
-        fill="#b8763e"
-        opacity="0.35"
-        stroke="#c9a227"
-        strokeWidth="1"
+    <div ref={ref} className={`relative overflow-hidden rounded-3xl ${height} ${className}`}>
+      <motion.img
+        src={src} alt={alt} loading="lazy"
+        style={{ scale, y }}
+        className="absolute inset-0 h-full w-full object-cover will-change-transform"
       />
-    </svg>
-  )
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#3A2020]/25 via-transparent to-transparent" />
+    </div>
+  );
 }
 
-function Products() {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  })
-  const bgY = useTransform(scrollYProgress, [0, 1], ['-5%', '5%'])
+/* ---------- Data ---------- */
+
+const SERVICES = [
+  { icon: Scissors, title: "Coiffure & Coiffure mariage", desc: "Coupes, coiffage, chignons de mariée, tresses, brushing." },
+  { icon: Sparkles, title: "Extensions & Dreadlocks", desc: "Pose, entretien et coiffage sur mesure." },
+  { icon: Hand, title: "Ongles", desc: "Manucure, pédicure, gel, semi-permanent, nail art." },
+  { icon: Eye, title: "Cils & Sourcils", desc: "Extensions de cils, rehaussement, restructuration sourcils." },
+  { icon: Brush, title: "Maquillage & Permanent", desc: "Maquillage soirée, mariée, dermopigmentation." },
+  { icon: Flower2, title: "Massage", desc: "Relaxant, tonique, aux pierres chaudes, aux huiles chaudes." },
+  { icon: Droplets, title: "Soins peau & acné", desc: "Nettoyage, hydratation, protocoles anti-acné." },
+  { icon: Wand2, title: "Épilation", desc: "Cire, sourcils, visage et corps." },
+];
+
+const REVIEWS = [
+  { name: "Aïcha K.", text: "Un accueil chaleureux et un travail impeccable. Mes ongles sont sublimes, je recommande à 100% !", rating: 5 },
+  { name: "Fatou D.", text: "J'ai fait mon maquillage de mariage ici. Résultat magnifique, tenue toute la journée. Merci !", rating: 5 },
+  { name: "Chimène A.", text: "Institut très propre, personnel professionnel. Le massage est un vrai moment de détente.", rating: 5 },
+  { name: "Roxane M.", text: "Mes extensions de cils sont parfaites, naturelles et bien posées. Je reviens sans hésiter.", rating: 5 },
+];
+
+const PRICES = [
+  { name: "Manucure classique", price: "8 000 FCFA" },
+  { name: "Pose semi-permanent", price: "15 000 FCFA" },
+  { name: "Extensions de cils", price: "à partir de 20 000 FCFA" },
+  { name: "Maquillage soirée", price: "25 000 FCFA" },
+  { name: "Maquillage mariée", price: "à partir de 75 000 FCFA" },
+  { name: "Massage 60 min", price: "20 000 FCFA" },
+  { name: "Soin visage complet", price: "18 000 FCFA" },
+  { name: "Coiffure mariage", price: "sur devis" },
+];
+
+const FAQ = [
+  { q: "Faut-il prendre rendez-vous à l'avance ?", a: "Oui, nous fonctionnons uniquement sur rendez-vous pour vous garantir un accueil personnalisé et éviter toute attente." },
+  { q: "Quels moyens de paiement acceptez-vous ?", a: "Espèces, Mobile Money (MTN, Moov) et cartes bancaires acceptés en institut." },
+  { q: "Proposez-vous des forfaits mariée ?", a: "Oui, nous créons un forfait sur mesure : essai, coiffure, maquillage, ongles et soins pour vous et votre cortège." },
+  { q: "Puis-je annuler ou reporter mon rendez-vous ?", a: "Bien sûr, un préavis de 24h nous permet de réorganiser l'agenda et de servir d'autres clientes." },
+];
+
+/* ---------- Sections ---------- */
+
+function Nav() {
+  return (
+    <header className="fixed top-0 inset-x-0 z-50">
+      <div className="mx-auto mt-4 max-w-6xl px-4">
+        <div className="glass-card flex items-center justify-between px-5 py-3">
+          <a href="#hero" className="flex items-center gap-2">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-white" style={{ background: "var(--gradient-brand)" }}>
+              <Flower2 className="h-4 w-4" />
+            </span>
+            <span className="font-display text-xl text-[color:var(--bordeaux)]">Lac de Beauté</span>
+          </a>
+          <nav className="hidden md:flex items-center gap-7 text-sm text-[color:var(--ink)]/80">
+            {[["À propos","about"],["Services","services"],["Galerie","gallery"],["Avis","reviews"],["Tarifs","prices"],["Contact","contact"]].map(([l,h])=>(
+              <a key={h} href={`#${h}`} className="hover:text-[color:var(--bordeaux)] transition">{l}</a>
+            ))}
+          </nav>
+          <a href="#booking" className="btn-pill text-sm !py-2.5 !px-5">Rendez-vous</a>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function Hero() {
+  const ref = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const bgY = useTransform(scrollYProgress, [0, 1], reduced ? ["0%","0%"] : ["-32%", "32%"]);
+  const midY = useTransform(scrollYProgress, [0, 1], reduced ? ["0%","0%"] : ["-18%", "18%"]);
+  const txtY = useTransform(scrollYProgress, [0, 1], reduced ? ["0%","0%"] : ["-4%", "4%"]);
+  const imgScale = useTransform(scrollYProgress, [0, 1], reduced ? [1,1] : [1, 1.22]);
+  const imgRotate = useTransform(scrollYProgress, [0, 1], reduced ? [0,0] : [0, -3]);
+  const fade = useTransform(scrollYProgress, [0, 1], [1, 0.55]);
 
   return (
-    <section
-      id="parfums"
-      ref={sectionRef}
-      className="relative py-28 md:py-36 overflow-hidden"
-    >
-      <motion.div
-        style={{ y: bgY }}
-        className="absolute inset-0 opacity-40"
-        aria-hidden
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-noir via-noyer/10 to-noir" />
+    <section id="hero" ref={ref} className="relative min-h-[100svh] overflow-hidden pt-28 md:pt-32 pb-24">
+      {/* Layer 0: soft silk background */}
+      <motion.div style={{ y: bgY }} className="absolute inset-0 -z-10">
+        <img src={bgDecor} alt="" className="h-full w-full object-cover opacity-60" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(253,248,245,0.75) 0%, rgba(251,234,229,0.9) 100%)" }} />
       </motion.div>
 
-      <div className="relative max-w-6xl mx-auto px-6 md:px-10">
+      {/* Layer 1: floating decorative blobs */}
+      <motion.div style={{ y: midY }} className="pointer-events-none absolute inset-0 -z-[5]">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
-        >
-          <p className="uppercase tracking-[0.35em] text-xs text-or mb-3">
-            Notre collection
-          </p>
-          <h2 className="font-heading text-4xl md:text-5xl text-creme">
-            Parfums signature
-          </h2>
-        </motion.div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {PRODUCTS.map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i} />
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ============================================================
-// À PROPOS
-// ============================================================
-function About() {
-  return (
-    <section id="a-propos" className="relative py-28 bg-noir-profond misk-grain">
-      <div className="max-w-5xl mx-auto px-6 md:px-10 grid md:grid-cols-2 gap-14 items-center">
+          animate={{ x: [0, 30, -10, 0], y: [0, -20, 15, 0], scale: [1, 1.08, 0.96, 1] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-10 -left-16 h-72 w-72 rounded-full blur-3xl opacity-60"
+          style={{ background: "radial-gradient(circle, #E8B4B8, transparent 70%)" }}
+        />
         <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.9 }}
-          className="relative aspect-[4/5] rounded-lg overflow-hidden border border-noyer-clair/30"
-        >
-          <img
-            src={HERO_PHOTOS[1]}
-            alt="Boutique Misk.229"
-            loading="lazy"
-            decoding="async"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-noir-profond/70 to-transparent" />
-        </motion.div>
-
+          animate={{ x: [0, -25, 15, 0], y: [0, 20, -15, 0], scale: [1, 0.94, 1.06, 1] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute top-40 right-0 h-96 w-96 rounded-full blur-3xl opacity-50"
+          style={{ background: "radial-gradient(circle, #D4A574, transparent 70%)" }}
+        />
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.9, delay: 0.15 }}
-        >
-          <p className="uppercase tracking-[0.35em] text-xs text-or mb-3">
-            Notre maison
-          </p>
-          <h2 className="font-heading text-4xl text-creme mb-6">À propos de Misk.229</h2>
-          <p className="text-creme-douce/80 leading-relaxed mb-4">
-            Nichée au cœur de Cotonou, Misk.229 est une parfumerie de niche dédiée
-            aux amateurs de senteurs orientales authentiques. Oud, musc, ambre et
-            épices précieuses composent un univers olfactif rare, sélectionné avec
-            exigence.
-          </p>
-          <p className="text-creme-douce/80 leading-relaxed mb-8">
-            Chaque flacon raconte une histoire — la nôtre commence dès votre premier
-            passage en boutique.
-          </p>
+          animate={{ x: [0, 15, -20, 0], y: [0, -10, 10, 0] }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full blur-3xl opacity-40"
+          style={{ background: "radial-gradient(circle, #FBEAE5, transparent 70%)" }}
+        />
+      </motion.div>
 
-          <div className="flex items-center gap-3 text-creme-douce">
-            <MapPin className="w-5 h-5 text-or shrink-0" />
-            <span>{ADDRESS}</span>
+      <div className="mx-auto max-w-6xl px-5 grid md:grid-cols-2 gap-10 items-center">
+        <motion.div style={{ y: txtY }} className="relative z-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--rose-gold)]/40 bg-white/60 backdrop-blur px-4 py-1.5 text-xs tracking-[0.2em] uppercase text-[color:var(--bordeaux)]">
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--gradient-brand)" }} />
+            Institut de beauté · Abomey-Calavi
           </div>
-        </motion.div>
-      </div>
-    </section>
-  )
-}
-
-// ============================================================
-// AVIS
-// ============================================================
-function ReviewsSection() {
-  return (
-    <section id="avis" className="relative py-28">
-      <div className="max-w-5xl mx-auto px-6 md:px-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-14"
-        >
-          <p className="uppercase tracking-[0.35em] text-xs text-or mb-3">
-            Ils nous font confiance
+          <h1 className="mt-6 text-[36px] leading-[1.05] md:text-[56px] md:leading-[1.02] font-display">
+            L'art de révéler <br />
+            <em className="not-italic bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-brand)" }}>votre beauté</em>,
+            en toute sérénité.
+          </h1>
+          <p className="mt-5 max-w-lg text-[color:var(--ink)]/70 text-base md:text-lg font-light">
+            Coiffure, ongles, cils, maquillage, massage et soins de la peau —
+            une parenthèse d'exception au cœur d'Abomey-Calavi, pensée pour vous.
           </p>
-          <h2 className="font-heading text-4xl md:text-5xl text-creme mb-4">Avis clients</h2>
-          <div className="flex items-center justify-center gap-2">
-            <div className="flex gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="w-5 h-5 fill-or text-or" />
-              ))}
-            </div>
-            <span className="text-creme-douce">
-              {GOOGLE_RATING.toFixed(1)} · {GOOGLE_REVIEWS_COUNT} avis Google
-            </span>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a href="#booking" className="btn-pill">Prendre rendez-vous</a>
+            <a href="tel:+2290150787878" className="btn-pill-outline"><Phone className="h-4 w-4" /> Appeler maintenant</a>
+          </div>
+          <div className="mt-8 flex items-center gap-4 text-sm text-[color:var(--ink)]/70">
+            <div className="flex">{Array.from({length:5}).map((_,i)=>(<Star key={i} className="h-4 w-4 fill-[color:var(--rose-gold)] text-[color:var(--rose-gold)]" />))}</div>
+            <span><strong className="text-[color:var(--bordeaux)]">5,0</strong> · avis Google clientes</span>
           </div>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {REVIEWS.map((review, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: i * 0.1 }}
-              className="rounded-lg border border-noyer-clair/30 bg-noyer/10 p-6"
-            >
-              <div className="flex gap-1 mb-4">
-                {Array.from({ length: 5 }).map((_, s) => (
-                  <Star key={s} className="w-4 h-4 fill-or text-or" />
-                ))}
+        <motion.div style={{ y: midY, opacity: fade }} className="relative">
+          <div className="absolute -inset-4 rounded-[36px] blur-2xl opacity-70" style={{ background: "var(--gradient-brand)" }} />
+          <div className="relative overflow-hidden rounded-[32px] border border-white/60 shadow-[0_30px_80px_rgba(107,39,55,0.25)]">
+            <motion.img
+              src={heroWoman} alt="Portrait beauté" width={1280} height={1600}
+              style={{ scale: imgScale, rotate: imgRotate }}
+              className="h-[420px] md:h-[600px] w-full object-cover will-change-transform"
+            />
+            <div className="absolute bottom-4 left-4 right-4 glass-card px-4 py-3 flex items-center gap-3">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-white" style={{ background: "var(--gradient-brand)" }}>
+                <Sparkles className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-widest text-[color:var(--bordeaux)]/70">Nouveau</p>
+                <p className="text-sm text-[color:var(--ink)] truncate">Forfait mariée sur mesure</p>
               </div>
-              <p className="text-creme-douce/85 leading-relaxed mb-4">{review.text}</p>
-              <p className="text-sm text-or-clair">{review.name}</p>
-            </motion.div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[color:var(--bordeaux)]/60 animate-bounce">
+        <ChevronDown className="h-6 w-6" />
+      </div>
+    </section>
+  );
+}
+
+function About() {
+  const ref = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion();
+  const { bgY, fgY } = useLayered(ref, !!reduced);
+  return (
+    <section id="about" ref={ref} className="relative py-24 md:py-32 overflow-hidden">
+      <motion.div
+        aria-hidden
+        style={{ y: bgY, background: "radial-gradient(circle, #FBEAE5, transparent 70%)" }}
+        className="pointer-events-none absolute -top-24 -right-24 h-[500px] w-[500px] rounded-full opacity-50 blur-3xl"
+      />
+      <div className="mx-auto max-w-6xl px-5 grid md:grid-cols-2 gap-14 items-center">
+        <Reveal>
+          <ZoomImage src={salonInterior} alt="Intérieur du salon Lac de Beauté" height="h-[420px] md:h-[560px]" />
+        </Reveal>
+        <motion.div style={{ y: fgY }}>
+          <Reveal>
+            <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--rose-gold)]">À propos</p>
+            <h2 className="mt-3 text-3xl md:text-5xl">Un écrin de douceur, pensé pour vous.</h2>
+            <p className="mt-6 text-[color:var(--ink)]/75 leading-relaxed">
+              Chez <strong>Lac de Beauté</strong>, chaque prestation est un moment suspendu.
+              Notre équipe passionnée conjugue expertise, produits haut de gamme et écoute
+              attentive pour révéler la beauté singulière de chacune.
+            </p>
+            <ul className="mt-6 space-y-3">
+              {["Équipe certifiée & bienveillante","Produits professionnels sélectionnés","Hygiène irréprochable","Rendez-vous personnalisés"].map((t)=>(
+                <li key={t} className="flex items-start gap-3 text-[color:var(--ink)]/80">
+                  <span className="mt-1 grid h-6 w-6 shrink-0 place-items-center rounded-full text-white" style={{ background: "var(--gradient-brand)" }}>
+                    <Check className="h-3.5 w-3.5" />
+                  </span>
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function ServiceCard({ Icon, title, desc, index }: { Icon: any; title: string; desc: string; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.6, delay: index * 0.06, ease: "easeOut" }}
+      whileHover={{ y: -12, scale: 1.03, boxShadow: "0 25px 50px rgba(107,39,55,0.2)" }}
+      className="glass-card p-6 md:p-7 group cursor-default"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0.7 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.15 + index * 0.05 }}
+        className="grid h-14 w-14 place-items-center rounded-2xl text-white shadow-[0_10px_20px_rgba(212,165,116,0.35)]"
+        style={{ background: "var(--gradient-brand)" }}
+      >
+        <Icon className="h-6 w-6" />
+      </motion.div>
+      <h3 className="mt-5 text-xl">{title}</h3>
+      <p className="mt-2 text-sm text-[color:var(--ink)]/70 leading-relaxed">{desc}</p>
+    </motion.div>
+  );
+}
+
+function Services() {
+  const ref = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion();
+  const { bgY } = useLayered(ref, !!reduced);
+  return (
+    <section id="services" ref={ref} className="relative py-24 md:py-32 overflow-hidden">
+      <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #FBEAE5 0%, #FDF8F5 100%)" }} />
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 h-[600px] w-[900px] rounded-full opacity-40 blur-3xl" style={{ background: "radial-gradient(ellipse, #E8B4B8, transparent 70%)" }} />
+      </motion.div>
+      <div className="mx-auto max-w-6xl px-5">
+        <Reveal className="text-center max-w-2xl mx-auto">
+          <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--rose-gold)]">Nos prestations</p>
+          <h2 className="mt-3 text-3xl md:text-5xl">Toute la beauté, sous un même toit.</h2>
+          <p className="mt-4 text-[color:var(--ink)]/70">Des soins minutieux à la coiffure de mariage, notre carte complète répond à chacun de vos désirs.</p>
+        </Reveal>
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {SERVICES.map((s, i) => (
+            <ServiceCard key={s.title} Icon={s.icon} title={s.title} desc={s.desc} index={i} />
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }
 
-// ============================================================
-// FOOTER
-// ============================================================
+function Gallery() {
+  const items = [
+    { src: galleryBride, alt: "Maquillage & coiffure mariée", tag: "Mariée" },
+    { src: galleryNails, alt: "Manucure élégante", tag: "Ongles" },
+    { src: galleryLashes, alt: "Extensions de cils", tag: "Cils" },
+    { src: gallerySpa, alt: "Soin & spa", tag: "Soins" },
+    { src: heroWoman, alt: "Maquillage & coiffure", tag: "Beauté" },
+    { src: salonInterior, alt: "Notre salon", tag: "Institut" },
+  ];
+  return (
+    <section id="gallery" className="relative py-24 md:py-32 overflow-hidden">
+      <div className="mx-auto max-w-6xl px-5">
+        <Reveal className="max-w-2xl">
+          <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--rose-gold)]">Galerie</p>
+          <h2 className="mt-3 text-3xl md:text-5xl">Nos moments de beauté.</h2>
+        </Reveal>
+        <div className="mt-14 grid gap-5 md:grid-cols-3">
+          {items.map((it, i) => (
+            <Reveal key={i} delay={i * 0.05} className="relative group">
+              <ZoomImage
+                src={it.src}
+                alt={it.alt}
+                height={i % 3 === 1 ? "h-[420px] md:h-[560px]" : "h-[360px] md:h-[440px]"}
+              />
+              <div className="absolute left-4 top-4 glass-card !rounded-full px-3 py-1 text-xs text-[color:var(--bordeaux)]">
+                {it.tag}
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Reviews() {
+  const ref = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion();
+  const { bgY, fgY } = useLayered(ref, !!reduced);
+  return (
+    <section id="reviews" ref={ref} className="relative py-24 md:py-32 overflow-hidden">
+      <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #FDF8F5, #FBEAE5)" }} />
+      </motion.div>
+      <div className="mx-auto max-w-6xl px-5">
+        <Reveal className="text-center max-w-2xl mx-auto">
+          <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--rose-gold)]">Elles nous font confiance</p>
+          <h2 className="mt-3 text-3xl md:text-5xl">
+            <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-brand)" }}>5,0</span>
+            <span className="ml-3">de moyenne sur Google</span>
+          </h2>
+          <div className="mt-4 flex justify-center">
+            {Array.from({length:5}).map((_,i)=>(<Star key={i} className="h-5 w-5 fill-[color:var(--rose-gold)] text-[color:var(--rose-gold)]" />))}
+          </div>
+        </Reveal>
+        <motion.div style={{ y: fgY }} className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {REVIEWS.map((r, i) => (
+            <Reveal key={i} delay={i * 0.08}>
+              <motion.article whileHover={{ y: -6 }} className="glass-card p-6 h-full">
+                <div className="flex gap-0.5">
+                  {Array.from({length:r.rating}).map((_,k)=>(<Star key={k} className="h-4 w-4 fill-[color:var(--rose-gold)] text-[color:var(--rose-gold)]" />))}
+                </div>
+                <p className="mt-4 text-[color:var(--ink)]/80 text-sm leading-relaxed">« {r.text} »</p>
+                <p className="mt-5 text-sm font-medium text-[color:var(--bordeaux)]">— {r.name}</p>
+              </motion.article>
+            </Reveal>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function Prices() {
+  return (
+    <section id="prices" className="relative py-24 md:py-32">
+      <div className="mx-auto max-w-5xl px-5">
+        <Reveal className="text-center max-w-2xl mx-auto">
+          <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--rose-gold)]">Tarifs</p>
+          <h2 className="mt-3 text-3xl md:text-5xl">Une transparence totale.</h2>
+          <p className="mt-4 text-[color:var(--ink)]/70">Nos tarifs indicatifs les plus demandés. Demandez un devis personnalisé pour les prestations mariage et forfaits.</p>
+        </Reveal>
+        <Reveal className="mt-12">
+          <div className="glass-card p-6 md:p-10">
+            <ul className="divide-y divide-[color:var(--rose-gold)]/20">
+              {PRICES.map((p) => (
+                <li key={p.name} className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-4 py-4">
+                  <span className="font-display text-lg md:text-xl text-[color:var(--bordeaux)] truncate">{p.name}</span>
+                  <span className="text-sm md:text-base text-[color:var(--ink)]/80 whitespace-nowrap">{p.price}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 flex flex-wrap gap-3 justify-center">
+              <a href="#booking" className="btn-pill">Réserver</a>
+              <a href="#contact" className="btn-pill-outline">Demander un devis</a>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Booking() {
+  const [sent, setSent] = useState(false);
+  return (
+    <section id="booking" className="relative py-24 md:py-32 overflow-hidden">
+      <div className="absolute inset-0 -z-10" style={{ background: "linear-gradient(180deg, #FBEAE5, #FDF8F5)" }} />
+      <div className="mx-auto max-w-4xl px-5">
+        <Reveal className="text-center">
+          <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--rose-gold)]">Rendez-vous</p>
+          <h2 className="mt-3 text-3xl md:text-5xl">Réservez votre parenthèse.</h2>
+          <p className="mt-4 text-[color:var(--ink)]/70">Choisissez votre prestation, date et heure — nous confirmons sous quelques heures.</p>
+        </Reveal>
+        <Reveal className="mt-12">
+          <form
+            onSubmit={(e) => { e.preventDefault(); setSent(true); }}
+            className="glass-card p-6 md:p-10 grid gap-5 sm:grid-cols-2"
+          >
+            <label className="grid gap-2 text-sm">
+              <span className="text-[color:var(--bordeaux)]">Prénom & nom</span>
+              <input required className="rounded-xl border border-[color:var(--rose-gold)]/40 bg-white/70 px-4 py-3 outline-none focus:border-[color:var(--rose-gold)]" placeholder="Votre nom" />
+            </label>
+            <label className="grid gap-2 text-sm">
+              <span className="text-[color:var(--bordeaux)]">Téléphone</span>
+              <input required type="tel" className="rounded-xl border border-[color:var(--rose-gold)]/40 bg-white/70 px-4 py-3 outline-none focus:border-[color:var(--rose-gold)]" placeholder="01 50 78 78 78" />
+            </label>
+            <label className="grid gap-2 text-sm sm:col-span-2">
+              <span className="text-[color:var(--bordeaux)]">Prestation souhaitée</span>
+              <select required className="rounded-xl border border-[color:var(--rose-gold)]/40 bg-white/70 px-4 py-3 outline-none focus:border-[color:var(--rose-gold)]">
+                <option value="">Choisir une prestation…</option>
+                {SERVICES.map((s) => <option key={s.title}>{s.title}</option>)}
+              </select>
+            </label>
+            <label className="grid gap-2 text-sm">
+              <span className="text-[color:var(--bordeaux)]">Date</span>
+              <input required type="date" className="rounded-xl border border-[color:var(--rose-gold)]/40 bg-white/70 px-4 py-3 outline-none focus:border-[color:var(--rose-gold)]" />
+            </label>
+            <label className="grid gap-2 text-sm">
+              <span className="text-[color:var(--bordeaux)]">Heure</span>
+              <input required type="time" className="rounded-xl border border-[color:var(--rose-gold)]/40 bg-white/70 px-4 py-3 outline-none focus:border-[color:var(--rose-gold)]" />
+            </label>
+            <label className="grid gap-2 text-sm sm:col-span-2">
+              <span className="text-[color:var(--bordeaux)]">Message (optionnel)</span>
+              <textarea rows={3} className="rounded-xl border border-[color:var(--rose-gold)]/40 bg-white/70 px-4 py-3 outline-none focus:border-[color:var(--rose-gold)] resize-none" placeholder="Précisions, préférences…" />
+            </label>
+            <div className="sm:col-span-2 flex flex-wrap items-center justify-between gap-4 pt-2">
+              <p className="text-xs text-[color:var(--ink)]/60">En envoyant ce formulaire, vous acceptez d'être recontactée.</p>
+              <motion.button whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(212,165,116,0.6)" }} className="btn-pill">
+                {sent ? "Demande envoyée ✓" : "Confirmer le rendez-vous"}
+              </motion.button>
+            </div>
+          </form>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Contact() {
+  return (
+    <section id="contact" className="relative py-24 md:py-32">
+      <div className="mx-auto max-w-6xl px-5 grid md:grid-cols-2 gap-10">
+        <Reveal>
+          <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--rose-gold)]">Contact & horaires</p>
+          <h2 className="mt-3 text-3xl md:text-5xl">Venez nous rencontrer.</h2>
+          <ul className="mt-8 space-y-5 text-[color:var(--ink)]/80">
+            <li className="flex items-start gap-4">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-white" style={{ background: "var(--gradient-brand)" }}><MapPin className="h-5 w-5" /></span>
+              <div><p className="font-medium text-[color:var(--bordeaux)]">Adresse</p><p className="text-sm">443, Abomey-Calavi, Bénin</p></div>
+            </li>
+            <li className="flex items-start gap-4">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-white" style={{ background: "var(--gradient-brand)" }}><Phone className="h-5 w-5" /></span>
+              <div><p className="font-medium text-[color:var(--bordeaux)]">Téléphone</p><a href="tel:+2290150787878" className="text-sm hover:text-[color:var(--bordeaux)]">01 50 78 78 78</a></div>
+            </li>
+            <li className="flex items-start gap-4">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-white" style={{ background: "var(--gradient-brand)" }}><Clock className="h-5 w-5" /></span>
+              <div>
+                <p className="font-medium text-[color:var(--bordeaux)]">Horaires</p>
+                <p className="text-sm">Lundi — <em className="not-italic text-[color:var(--bordeaux)]/70">fermé</em></p>
+                <p className="text-sm">Mardi à Dimanche — 08h00 à 22h00</p>
+              </div>
+            </li>
+          </ul>
+          <div className="mt-8 flex gap-3">
+            <a href="#" className="btn-pill-outline !py-2.5 !px-4"><Instagram className="h-4 w-4" /> Instagram</a>
+            <a href="#" className="btn-pill-outline !py-2.5 !px-4"><Facebook className="h-4 w-4" /> Facebook</a>
+          </div>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="overflow-hidden rounded-3xl border border-[color:var(--rose-gold)]/30 shadow-[0_20px_60px_rgba(107,39,55,0.15)] h-[420px]">
+            <iframe
+              title="Lac de Beauté — Abomey-Calavi"
+              src="https://www.google.com/maps?q=Abomey-Calavi,B%C3%A9nin&output=embed"
+              className="h-full w-full"
+              loading="lazy"
+            />
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Faq() {
+  const [open, setOpen] = useState<number | null>(0);
+  return (
+    <section id="faq" className="relative py-24 md:py-32">
+      <div className="absolute inset-0 -z-10" style={{ background: "linear-gradient(180deg, #FDF8F5, #FBEAE5)" }} />
+      <div className="mx-auto max-w-3xl px-5">
+        <Reveal className="text-center">
+          <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--rose-gold)]">FAQ</p>
+          <h2 className="mt-3 text-3xl md:text-5xl">Vos questions, nos réponses.</h2>
+        </Reveal>
+        <div className="mt-12 space-y-3">
+          {FAQ.map((f, i) => (
+            <Reveal key={i} delay={i * 0.05}>
+              <button
+                type="button"
+                onClick={() => setOpen(open === i ? null : i)}
+                className="glass-card w-full text-left px-6 py-5 transition"
+              >
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+                  <span className="font-display text-lg text-[color:var(--bordeaux)]">{f.q}</span>
+                  <ChevronDown className={`h-5 w-5 shrink-0 text-[color:var(--rose-gold)] transition ${open === i ? "rotate-180" : ""}`} />
+                </div>
+                {open === i && (
+                  <motion.p initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="mt-3 text-sm text-[color:var(--ink)]/75 leading-relaxed">
+                    {f.a}
+                  </motion.p>
+                )}
+              </button>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Footer() {
   return (
-    <footer id="contact" className="relative bg-noir-profond border-t border-noyer-clair/30 pt-16 pb-8">
-      <div className="max-w-6xl mx-auto px-6 md:px-10 grid md:grid-cols-3 gap-10 mb-12">
+    <footer className="relative pt-16 pb-10 text-[color:var(--cream)]" style={{ background: "linear-gradient(180deg, #6B2737 0%, #4a1a26 100%)" }}>
+      <div className="mx-auto max-w-6xl px-5 grid gap-10 md:grid-cols-3">
         <div>
-          <p className="font-heading text-2xl tracking-[0.25em] text-creme mb-4">
-            MISK<span className="text-or">.229</span>
-          </p>
-          <p className="text-creme-douce/70 text-sm leading-relaxed">
-            Parfumerie orientale de niche à Cotonou. Oud, musc, ambre et épices
-            précieuses, sélectionnés avec exigence.
-          </p>
-        </div>
-
-        <div>
-          <p className="uppercase tracking-[0.3em] text-xs text-or mb-4">Contact</p>
-          <div className="flex flex-col gap-3 text-sm text-creme-douce/85">
-            <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-or transition-colors">
-              <Phone className="w-4 h-4" /> +229 01 51 25 95 42
-            </a>
-            <a href={INSTAGRAM_LINK} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-or transition-colors">
-              <Instagram className="w-4 h-4" /> {INSTAGRAM_HANDLE}
-            </a>
-            <span className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 shrink-0" /> {ADDRESS}
-            </span>
+          <div className="flex items-center gap-2">
+            <span className="grid h-10 w-10 place-items-center rounded-full text-white" style={{ background: "var(--gradient-brand)" }}><Flower2 className="h-5 w-5" /></span>
+            <span className="font-display text-2xl">Lac de Beauté</span>
           </div>
+          <p className="mt-4 text-sm text-white/70 max-w-xs">Institut de beauté à Abomey-Calavi — coiffure, ongles, cils, maquillage, massage, soins.</p>
         </div>
-
-        <div>
-          <p className="uppercase tracking-[0.3em] text-xs text-or mb-4">Navigation</p>
-          <div className="flex flex-col gap-3 text-sm text-creme-douce/85">
-            <a href="#accueil" className="hover:text-or transition-colors">Accueil</a>
-            <a href="#parfums" className="hover:text-or transition-colors">Parfums</a>
-            <a href="#a-propos" className="hover:text-or transition-colors">À propos</a>
-            <a href="#avis" className="hover:text-or transition-colors">Avis</a>
-          </div>
+        <div className="text-sm text-white/80">
+          <p className="font-display text-lg text-white">Contact</p>
+          <p className="mt-3">443, Abomey-Calavi</p>
+          <p><a href="tel:+2290150787878" className="hover:text-white">01 50 78 78 78</a></p>
+          <p className="mt-2">Mar–Dim · 08h–22h</p>
+        </div>
+        <div className="text-sm text-white/80">
+          <p className="font-display text-lg text-white">Navigation</p>
+          <ul className="mt-3 grid grid-cols-2 gap-y-1">
+            {[["Services","services"],["Galerie","gallery"],["Avis","reviews"],["Tarifs","prices"],["Rendez-vous","booking"],["FAQ","faq"]].map(([l,h])=>(
+              <li key={h}><a className="hover:text-white" href={`#${h}`}>{l}</a></li>
+            ))}
+          </ul>
         </div>
       </div>
-
-      <div className="max-w-6xl mx-auto px-6 md:px-10 pt-6 border-t border-noyer-clair/20 text-center text-xs text-creme-douce/50">
-        © {new Date().getFullYear()} Misk.229 — Tous droits réservés.
+      <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-white/50">
+        © {new Date().getFullYear()} Lac de Beauté · Tous droits réservés
       </div>
     </footer>
-  )
+  );
 }
 
-// ============================================================
-// BOUTON WHATSAPP FLOTTANT
-// ============================================================
-function WhatsAppFloatingButton() {
+function Index() {
   return (
-    <motion.a
-      href={WHATSAPP_LINK}
-      target="_blank"
-      rel="noopener noreferrer"
-      initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, delay: 4.2 }}
-      whileHover={{ scale: 1.08 }}
-      className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-or px-5 py-3.5 text-noir shadow-[0_8px_30px_rgba(201,162,39,0.4)]"
-      aria-label="Contacter Misk.229 sur WhatsApp"
-    >
-      <MessageCircle className="w-5 h-5" />
-      <span className="hidden sm:inline text-sm font-medium">Écrire sur WhatsApp</span>
-    </motion.a>
-  )
+    <main className="relative">
+      <Nav />
+      <Hero />
+      <CurveDivider color="#FDF8F5" />
+      <About />
+      <Services />
+      <Gallery />
+      <Reviews />
+      <Prices />
+      <Booking />
+      <Contact />
+      <Faq />
+      <Footer />
+    </main>
+  );
 }
